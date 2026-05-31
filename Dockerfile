@@ -11,12 +11,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     pkg-config \
-    qt5-qmake \
-    qtbase5-dev \
-    qtbase5-dev-tools \
-    qtmultimedia5-dev \
-    libqt5svg5-dev \
-    libqt5sql5-sqlite \
+    qmake6 \
+    qt6-base-dev \
+    qt6-base-dev-tools \
+    qt6-5compat-dev \
+    qt6-svg-dev \
+    qt6-multimedia-dev \
+    libqt6sql6-sqlite \
     leela-zero \
     clinfo \
     ocl-icd-libopencl1 \
@@ -35,7 +36,7 @@ WORKDIR /src/q5go
 RUN git clone --depth=1 https://github.com/bernds/q5go.git . \
  && mkdir build \
  && cd build \
- && qmake ../src/q5go.pro PREFIX=/opt/q5go \
+ && qmake6 ../src/q5go.pro PREFIX=/opt/q5go \
  && make -j"$(nproc)" \
  && make install
 
