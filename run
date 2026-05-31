@@ -1,0 +1,32 @@
+#!/bin/bash
+rm -f /tmp/.docker.xauth
+touch /tmp/.docker.xauth
+
+xauth nlist ":0" \
+  | sed -e 's/^..../ffff/' \
+  | xauth -f /tmp/.docker.xauth nmerge -
+
+chmod 644 /tmp/.docker.xauth
+RUNTIME_BASE="${XDG_RUNTIME_DIR:-/tmp}"
+RUNTIME_DIR="$RUNTIME_BASE/q5go-docker"
+mkdir -p "$RUNTIME_DIR"
+chmod 700 "$RUNTIME_DIR"
+
+docker run --rm -it \
+  --user "$(id -u):$(id -g)" \
+  --group-add "$(getent group video | cut -d: -f3)" \
+  --gpus all \
+  -e NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics \
+  -e DISPLAY="$DISPLAY" \
+  -e XAUTHORITY=/tmp/.docker.xauth \
+  -e XDG_RUNTIME_DIR=/tmp/runtime \
+  -e HOME=/tmp/home \
+  -e QT_X11_NO_MITSHM=1 \
+  -e LIBGL_ALWAYS_SOFTWARE=1 \
+  -v /etc/OpenCL/vendors:/etc/OpenCL/vendors:ro \
+  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+  -v "/tmp/.docker.xauth:/tmp/.docker.xauth:ro" \
+  -v "$PWD/go-engines/katago:/opt/katago/models:ro" \
+  -v "$PWD/home:/tmp/home" \
+  q5go-engines
+
